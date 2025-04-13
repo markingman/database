@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Run from: vendor/bin/phpunit -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	bootstrap="tests/bootstrap.php" 
+    displayDetailsOnTestsThatTriggerErrors="true"
+    displayDetailsOnTestsThatTriggerNotices="true"
+    displayDetailsOnTestsThatTriggerWarnings="true"
+    displayDetailsOnTestsThatTriggerDeprecations="true"
+    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd">
+  <coverage pathCoverage="false">
+    <report>
+      <html outputDirectory="phpunit-coverage" lowUpperBound="50" highLowerBound="90"/>
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="Templator Test Suite">
+      <file>tests/MySQLIConnectionTest.php</file>
+    </testsuite>
+  </testsuites>
+  <source>
+    <include>
+      <directory>src</directory>
+    </include>
+  </source>
+</phpunit>
