@@ -13,9 +13,9 @@ use const MYSQLI_REPORT_STRICT;
 
 class MySQLIConnection implements DbConnectionInterface
 {
-	const array TYPES_READ = ['SELECT', 'SHOW', 'DESC', 'DESCRIBE', 'EXPLAIN'];
+	const array TYPES_READ = ['SELECT', 'SHOW', 'DESC', 'DESCRIBE', 'EXPLAIN', 'ANALYZE', 'CHECK', 'OPTIMIZE', 'REPAIR'];
 	const array TYPES_WRITE = ['INSERT', 'UPDATE', 'DELETE', 'REPLACE', 'LOAD'];
-	const array TYPES_COMMAND = ['ALTER', 'ANALYZE', 'CHECK', 'COMMIT', 'CREATE', 'DROP', 'FLUSH', 'GRANT', 'OPTIMIZE', 'REPAIR', 'ROLLBACK', 'SET', 'START', 'TRUNCATE'];
+	const array TYPES_COMMAND = ['ALTER', 'BEGIN', 'COMMIT', 'CREATE', 'DROP', 'FLUSH', 'GRANT', 'ROLLBACK', 'SET', 'START', 'TRUNCATE'];
 
 	protected mysqli $Db;
 	private ?StmtInterface $stmt = null;
@@ -38,7 +38,7 @@ class MySQLIConnection implements DbConnectionInterface
 		}
 	}
 
-	public static function set_strict_reporting(): void
+	public static function set_report_mode_strict(): void
 	{
 		// Note this is PHP 8.1+ default, strict throws exceptions
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -118,13 +118,13 @@ class MySQLIConnection implements DbConnectionInterface
 		try {
 			$stmt = $this->Db->prepare($query);
 		} catch (mysqli_sql_exception $e) {
-			throw new LogicException(message: 'Could not prepare query;' . $e->getMessage(), previous: $e);
+			throw new LogicException(message: 'Could not prepare query; ' . $e->getMessage(), previous: $e);
 		}
 
 		if ($stmt === false) {
 			throw new LogicException(sprintf(
-				'Could not prepare query; %s...; %s',
-				substr(trim($query), 0, 32), $this->Db->error ?? 'unknown error'
+				'Could not prepare query; %s',
+				$this->Db->error ?? 'Unknown error; ' . substr(trim($query), 0, 32) . '...'
 			));
 		}
 

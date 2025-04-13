@@ -26,7 +26,7 @@ class MySQLIStmt implements StmtInterface
 
 	public function get_affected_rows(): int
 	{
-		$n = $this->stmt?->affected_rows ?? 0;
+		$n = $this->stmt->affected_rows ?? 0;
 
 		// 64-bit assumed; cap at PHP_INT_MAX
 		return is_string($n) ? PHP_INT_MAX : $n;

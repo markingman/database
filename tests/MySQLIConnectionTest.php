@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use LogicException;
+use const MYSQLI_REPORT_OFF;
 
 class MySQLIConnectionTest extends TestCase
 {
@@ -13,7 +14,7 @@ class MySQLIConnectionTest extends TestCase
 
 	public function setUp(): void
 	{
-		MySQLIConnection::set_strict_reporting();
+		MySQLIConnection::set_report_mode_strict();
 	}
 
 	public function testCreateFailHost(): void
@@ -107,7 +108,17 @@ class MySQLIConnectionTest extends TestCase
 	public function testReadFailQuery(): void
 	{
 		$this->expectException(LogicException::class);
-		$this->expectExceptionMessage('Could not prepare query');
+		$this->expectExceptionMessage('Could not prepare query; ');
+
+		$this->connectDb()->read('SELECT * FROM ...');
+	}
+
+	public function testReadFailQueryNoReports(): void
+	{
+		mysqli_report(MYSQLI_REPORT_OFF);
+
+		$this->expectException(LogicException::class);
+		$this->expectExceptionMessage('Could not prepare query; ');
 
 		$this->connectDb()->read('SELECT * FROM ...');
 	}
@@ -215,6 +226,82 @@ class MySQLIConnectionTest extends TestCase
 			],
 			$this->connectDb()->read(
 				'EXPLAIN SELECT 1 FROM `test_default` WHERE `id` = 101319533431619584'
+			)->fetch_object()
+		);
+	}
+
+	public function testReadAnalyze(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertEquals(
+			(object)[
+				'Table' => sprintf('%s.test_default', $db->get_database()),
+				'Op' => 'analyze',
+				'Msg_type' => 'status',
+				'Msg_text' => 'OK',
+			],
+			$db->read(
+				'ANALYZE TABLE `test_default`'
+			)->fetch_object()
+		);
+	}
+
+	public function testReadCheck(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertEquals(
+			(object)[
+				'Table' => sprintf('%s.test_default', $db->get_database()),
+				'Op' => 'check',
+				'Msg_type' => 'status',
+				'Msg_text' => 'OK',
+			],
+			$db->read(
+				'CHECK TABLE `test_default`'
+			)->fetch_object()
+		);
+	}
+
+	public function testReadOptimize(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertEquals(
+			[
+				[
+					'Table' => sprintf('%s.test_default', $db->get_database()),
+					'Op' => 'optimize',
+					'Msg_type' => 'note',
+					'Msg_text' => 'Table does not support optimize, doing recreate + analyze instead',
+				],
+				[
+					'Table' => sprintf('%s.test_default', $db->get_database()),
+					'Op' => 'optimize',
+					'Msg_type' => 'status',
+					'Msg_text' => 'OK',
+				],
+			],
+			$db->read(
+				'OPTIMIZE TABLE `test_default`'
+			)->fetch_all()
+		);
+	}
+
+	public function testReadRepair(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertEquals(
+			(object)[
+				'Table' => sprintf('%s.test_default', $db->get_database()),
+				'Op' => 'repair',
+				'Msg_type' => 'note',
+				'Msg_text' => 'The storage engine for the table doesn\'t support repair',
+			],
+			$db->read(
+				'REPAIR TABLE `test_default`'
 			)->fetch_object()
 		);
 	}
@@ -534,14 +621,119 @@ class MySQLIConnectionTest extends TestCase
 		);
 	}
 
-// ANALYZE TABLE
-// CHECK TABLE
-// OPTIMIZE TABLE
-// REPAIR TABLE
-// SET
-// START TRANSACTION
-// COMMIT
-// ROLLBACK
+	public function testCommandSet(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertTrue(
+			$db->command('SET @test = 123')
+		);
+
+		$this->assertEquals(
+			123,
+			$db->read(
+				'SELECT @test AS test'
+			)->fetch_object()?->test
+		);
+	}
+
+	public function testCommandCommit(): void
+	{
+		$db = $this->connectDb();
+		$db2 = $this->connectDb();
+		$id1 = $this->getNewId($db);
+		$id2 = $this->getNewId($db);
+
+		$this->assertTrue($db->command('BEGIN'));
+
+		$db->write('INSERT INTO `test_default` SET `id` = ?, `name` = "Test 1"', [$id1]);
+		$db->write('INSERT INTO `test_default` SET `id` = ?, `name` = "Test 2"', [$id2]);
+
+		$this->assertEquals(
+			2,
+			$db->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+		$this->assertEquals(
+			0,
+			$db2->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+
+		$this->assertTrue($db->command('COMMIT'));
+
+		$this->assertEquals(
+			2,
+			$db->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+		$this->assertEquals(
+			2,
+			$db2->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+	}
+
+	public function testCommandRollback(): void
+	{
+		$db = $this->connectDb();
+		$db2 = $this->connectDb();
+		$id1 = $this->getNewId($db);
+		$id2 = $this->getNewId($db);
+
+		$this->assertTrue($db->command('BEGIN'));
+		$db->write('INSERT INTO `test_default` SET `id` = ?, `name` = "Test 1"', [$id1]);
+		$db->write('INSERT INTO `test_default` SET `id` = ?, `name` = "Test 2"', [$id2]);
+
+		$this->assertEquals(
+			2,
+			$db->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+		$this->assertEquals(
+			0,
+			$db2->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+
+		$this->assertTrue($db->command('ROLLBACK'));
+
+		$this->assertEquals(
+			0,
+			$db->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+		$this->assertEquals(
+			0,
+			$db2->read(
+				'SELECT COUNT(*) n FROM `test_default` ' .
+				'WHERE `id` IN (?, ?) ',
+				[$id1, $id2]
+			)->fetch_object()?->n
+		);
+	}
+
 // GRANT / REVOKE
 // FLUSH PRIVILEGES
 
