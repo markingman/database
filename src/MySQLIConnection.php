@@ -40,7 +40,7 @@ class MySQLIConnection implements DbConnectionInterface
 
 	public static function set_report_mode_strict(): void
 	{
-		// Note this is PHP 8.1+ default, strict throws exceptions
+		// Note this is PHP 8.1+ default, strict throws exceptions. Set in php.ini in production
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 	}
 
@@ -71,10 +71,6 @@ class MySQLIConnection implements DbConnectionInterface
 			throw new InvalidArgumentException(sprintf('Unexpected query type "%s"', $this->get_query_token($query)));
 		}
 
-// 		if ($this->stmt instanceof StmtInterface) {
-// 			$this->stmt->close();
-// 		}
-
 		$this->stmt = $this->prepare($query);
 		$this->stmt->execute($vars);
 
@@ -88,10 +84,6 @@ class MySQLIConnection implements DbConnectionInterface
 			throw new InvalidArgumentException(sprintf('Unexpected query type "%s"', $this->get_query_token($query)));
 		}
 
-// 		if ($this->stmt instanceof StmtInterface) {
-// 			$this->stmt->close();
-// 		}
-
 		$this->stmt = $this->prepare($query);
 
 		return $this->stmt->execute($vars);
@@ -103,10 +95,6 @@ class MySQLIConnection implements DbConnectionInterface
 		if (!in_array(strtoupper($this->get_query_token($query)), static::TYPES_COMMAND, true)) {
 			throw new InvalidArgumentException(sprintf('Unexpected query type "%s"', $this->get_query_token($query)));
 		}
-
-// 		if ($this->stmt instanceof StmtInterface) {
-// 			$this->stmt->close();
-// 		}
 
 		$this->stmt = $this->prepare($query);
 

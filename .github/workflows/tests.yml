@@ -1,0 +1,37 @@
+name: Run PHP Tests in Docker
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['8.3','8.4']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (PHP ${{ matrix.php-version }})
+        run: |
+          docker build --build-arg PHP_VERSION=${{ matrix.php-version }} \
+            -t database-test-php:${{ matrix.php-version }} .
+
+      - name: Run container and execute tests
+        run: |
+          docker run --rm -v `pwd`/src:/usr/src/app/src -v `pwd`/tests:/usr/src/app/tests \
+            database-test-php:${{ matrix.php-version }} vendor/bin/phpunit
+
+      - name: Run container and execute analyse
+        run: |
+          docker run --rm -v `pwd`/src:/usr/src/app/src -v `pwd`/tests:/usr/src/app/tests \
+            database-test-php:${{ matrix.php-version }} vendor/bin/phpstan analyse -c phpstan.neon
+
+

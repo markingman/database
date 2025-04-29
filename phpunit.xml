@@ -13,8 +13,8 @@
     </report>
   </coverage>
   <testsuites>
-    <testsuite name="Templator Test Suite">
-      <file>tests/MySQLIConnectionTest.php</file>
+    <testsuite name="Unit Tests">
+      <directory suffix="Test.php">tests</directory>
     </testsuite>
   </testsuites>
   <source>

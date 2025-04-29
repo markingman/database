@@ -4,15 +4,6 @@ namespace MarkIngman\Database;
 
 interface DbConnectionInterface
 {
-	public function __construct(
-		?string $hostname = null,
-		?string $username = null,
-		?string $password = null,
-		?string $database = null,
-		?int $port = null,
-		?string $socket = null,
-	);
-
 	public function get_hostname(): string;
 
 	public function get_username(): string;

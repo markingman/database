@@ -3,9 +3,9 @@
 namespace MarkIngman\Database;
 
 use InvalidArgumentException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
-use LogicException;
 use const MYSQLI_REPORT_OFF;
 
 class MySQLIConnectionTest extends TestCase
@@ -306,6 +306,37 @@ class MySQLIConnectionTest extends TestCase
 		);
 	}
 
+	public function testReadMulti(): void
+	{
+		$db = $this->connectDb();
+
+		$res = $db->read(
+			'SELECT `name` FROM `test_default` ORDER BY `id` LIMIT 3'
+		);
+		$this->assertEquals(3, $res->num_rows());
+
+		$this->assertEquals('Alice', $res->fetch_object()?->name);
+
+		$this->assertEquals(
+			'pending',
+			$db->read(
+				'SELECT `status` FROM `test_default` WHERE `id` = ?', [101319533431619586]
+			)->fetch_object()?->status
+		);
+		$this->assertEquals('Bob', $res->fetch_object()?->name);
+
+		$this->assertEquals(
+			'inactive',
+			$db->read(
+				'SELECT `status` FROM `test_default` WHERE `id` = ?', [101319533431619585]
+			)->fetch_object()?->status
+		);
+
+		$this->assertEquals('Charlie', $res->fetch_object()?->name);
+		$this->assertNull($res->fetch_object());
+		$this->assertEquals(3, $res->num_rows());
+	}
+
 	public function testWriteFailQueryType(): void
 	{
 		$this->expectException(InvalidArgumentException::class);
@@ -337,7 +368,7 @@ class MySQLIConnectionTest extends TestCase
 		$res = $db->read(
 			'SELECT * FROM `test_default` WHERE `id` = ?', [101319533431619590]
 		);
-		
+
 		$this->assertEquals(1, $res->num_rows());
 		$this->assertEquals('Jane', $res->fetch_object()?->name);
 		$this->assertEquals(1, $db->affected_rows());
@@ -444,7 +475,7 @@ class MySQLIConnectionTest extends TestCase
 		$this->assertEquals(
 			3,
 			$db->read(
-				'SELECT COUNT(*) n FROM `test_default` WHERE `name` IN (?, ?, ?)', 
+				'SELECT COUNT(*) n FROM `test_default` WHERE `name` IN (?, ?, ?)',
 				['Rod', 'Wang', 'Kelly Anne']
 			)->fetch_object()?->n
 		);
