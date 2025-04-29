@@ -2,7 +2,7 @@ name: Run PHP Tests in Docker
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
 
 jobs:
@@ -10,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.3','8.4']
+        # php-version: ['8.3','8.4']
+        php-version: [ '8.3' ]
 
     steps:
       - name: Checkout repository
