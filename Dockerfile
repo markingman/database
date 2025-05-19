@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
 	mariadb-client 
 
 RUN docker-php-ext-install mysqli \
-    && pecl install xdebug-3.3.2 \
+    && pecl install xdebug-3.4.2 \
     && docker-php-ext-enable xdebug
     
 RUN mkdir -p /var/run/mysqld && chown -R mysql:mysql /var/run/mysqld

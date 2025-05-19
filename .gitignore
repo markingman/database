@@ -3,6 +3,5 @@
 /.phpunit*
 /*.bbprojectd
 /composer.lock
-/composer.phar
 /phpunit-coverage
 /vendor
