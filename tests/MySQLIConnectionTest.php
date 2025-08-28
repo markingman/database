@@ -374,6 +374,23 @@ class MySQLIConnectionTest extends TestCase
 		$this->assertEquals(1, $db->affected_rows());
 	}
 
+	public function testWriteInsertId(): void
+	{
+		$db = $this->connectDb();
+
+		$this->assertTrue(
+			$db->write('INSERT INTO `test_insert_id` SET `example` = "test 1"')
+		);
+
+		$this->assertEquals(1, $db->insert_id());
+
+		$this->assertTrue(
+			$db->write('INSERT INTO `test_insert_id` SET `example` = "test 2"')
+		);
+
+		$this->assertEquals(2, $db->insert_id());
+	}
+
 	public function testWriteUpdate(): void
 	{
 		$this->assertTrue(

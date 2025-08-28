@@ -36,3 +36,8 @@ CREATE TABLE test_index_drop (
     example VARCHAR(10) NOT NULL,
     INDEX idx_example (example)
 ) ENGINE=InnoDB;
+
+CREATE TABLE test_insert_id (
+	id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    example VARCHAR(10) NOT NULL
+) ENGINE=InnoDB;

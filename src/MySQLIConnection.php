@@ -139,6 +139,14 @@ class MySQLIConnection implements DbConnectionInterface
 		$this->Db->rollback();
 	}
 
+	public function insert_id(): int
+	{
+		$id = $this->Db->insert_id;
+
+		// 64-bit assumed; cap at PHP_INT_MAX
+		return is_string($id) ? PHP_INT_MAX : $id;
+	}
+
 	protected function get_query_token(string $query): string
 	{
 		return (string)strtok($query, ' ');
