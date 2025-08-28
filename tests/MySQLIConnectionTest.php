@@ -222,7 +222,7 @@ class MySQLIConnectionTest extends TestCase
 				'key_len' => '8',
 				'ref' => 'const',
 				'rows' => '1',
-				'Extra' => 'Using index',
+				'Extra' => '',
 			],
 			$this->connectDb()->read(
 				'EXPLAIN SELECT 1 FROM `test_default` WHERE `id` = 101319533431619584'
@@ -297,8 +297,8 @@ class MySQLIConnectionTest extends TestCase
 			(object)[
 				'Table' => sprintf('%s.test_default', $db->get_database()),
 				'Op' => 'repair',
-				'Msg_type' => 'note',
-				'Msg_text' => 'The storage engine for the table doesn\'t support repair',
+				'Msg_type' => 'status',
+				'Msg_text' => 'OK',
 			],
 			$db->read(
 				'REPAIR TABLE `test_default`'
