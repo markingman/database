@@ -1,6 +1,6 @@
 {
   "name": "markingman/database",
-  "description": "Simple PHP database wrapper.",
+  "description": "Simple PHP database wrapper",
   "license": "MIT",
   "type": "library",
   "require": {
