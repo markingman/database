@@ -8,8 +8,17 @@ use mysqli;
 use mysqli_sql_exception;
 use RuntimeException;
 use Throwable;
+use function in_array;
+use function is_string;
+use function mysqli_report;
+use function sprintf;
+use function strtok;
+use function strtoupper;
+use function substr;
+use function trim;
 use const MYSQLI_REPORT_ERROR;
 use const MYSQLI_REPORT_STRICT;
+use const PHP_INT_MAX;
 
 class MySQLIConnection implements DbConnectionInterface
 {

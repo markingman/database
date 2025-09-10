@@ -3,6 +3,8 @@
 namespace MarkIngman\Database;
 
 use mysqli_stmt;
+use function is_string;
+use const PHP_INT_MAX;
 
 class MySQLIStmt implements StmtInterface
 {

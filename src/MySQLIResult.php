@@ -4,6 +4,9 @@ namespace MarkIngman\Database;
 
 use mysqli_result;
 use stdClass;
+use function is_string;
+use const MYSQLI_ASSOC;
+use const PHP_INT_MAX;
 
 class MySQLIResult implements ResultInterface
 {
