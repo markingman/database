@@ -1,6 +1,6 @@
 ARG PHP_VERSION=8.3
-ARG COMPOSER_VERSION=2.8.1
-ARG XDEBUG_VERSION=3.4.2
+ARG COMPOSER_VERSION=2.9.2
+ARG XDEBUG_VERSION=3.4.7
 
 FROM php:${PHP_VERSION}-cli AS base
 ARG XDEBUG_VERSION
@@ -29,8 +29,8 @@ FROM base
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-COPY . /usr/src/app
 WORKDIR /usr/src/app
+COPY . .
 
 RUN /usr/bin/composer install --prefer-dist
 
