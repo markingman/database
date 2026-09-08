@@ -20,7 +20,7 @@ class MySQLIResult implements ResultInterface
 		return $this->result?->fetch_object() ?: null;
 	}
 
-	/** @return array<int, array<string, string|int|float|null>> */
+	/** @return list<array> */
 	public function fetch_all(): array
 	{
 		return $this->result?->fetch_all(MYSQLI_ASSOC) ?? [];
