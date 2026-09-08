@@ -1,6 +1,6 @@
 ARG PHP_VERSION=8.3
 ARG COMPOSER_VERSION=2.9.2
-ARG XDEBUG_VERSION=3.4.7
+ARG XDEBUG_VERSION=3.5.1
 
 FROM php:${PHP_VERSION}-cli AS base
 ARG XDEBUG_VERSION
@@ -32,7 +32,7 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 WORKDIR /usr/src/app
 COPY . .
 
-RUN /usr/bin/composer install --prefer-dist
+RUN /usr/bin/composer install --prefer-dist --no-interaction
 
 COPY my.cnf /etc/mysql/my.cnf
 
