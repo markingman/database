@@ -3,6 +3,7 @@
 /.github              export-ignore
 /.gitignore           export-ignore
 /Dockerfile           export-ignore
+/entrypoint.sh        export-ignore
 /Makefile             export-ignore
 /my.cnf               export-ignore
 /phpstan.neon         export-ignore
