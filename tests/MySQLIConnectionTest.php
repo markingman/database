@@ -892,8 +892,16 @@ class MySQLIConnectionTest extends TestCase
 	 */
 	protected function getConfig(): array
 	{
-		if (!$config = parse_ini_file(__DIR__ . '/fixtures/config.ini')) {
+		$config = parse_ini_file(__DIR__ . '/fixtures/config.ini');
+
+		if (!is_array($config)) {
 			throw new RuntimeException('Could not load config');
+		}
+
+		foreach ($config as $k => $v) {
+			if (!is_string($v)) {
+				throw new RuntimeException('Could not load config');
+			}
 		}
 
 		return [
@@ -914,7 +922,6 @@ class MySQLIConnectionTest extends TestCase
 			username: $config['username'] ?: null,
 			password: $config['password'] ?: null,
 			database: $config['database'] ?: null,
-		//socket
 		);
 	}
 
@@ -924,6 +931,6 @@ class MySQLIConnectionTest extends TestCase
 			throw new RuntimeException('Could not create ID');
 		}
 
-		return $id;
+		return is_int($id) ? $id : 0;
 	}
 }

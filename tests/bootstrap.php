@@ -6,4 +6,3 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 exec('mariadb -uroot -proot < ' . __DIR__ . '/fixtures/init.sql');
 exec('mariadb -uroot -proot test < ' . __DIR__ . '/fixtures/schema.sql');
-
